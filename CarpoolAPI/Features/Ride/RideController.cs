@@ -14,7 +14,7 @@ public class RideController : ControllerBase
         _context = context;
     }
 
-    [HttpPost]
+    [HttpPost("AddDriverRide")]
     public async Task<ActionResult<RideDto>> AddRide(AddRideDto addRideDto)
     {
         var user = await _context
@@ -48,7 +48,8 @@ public class RideController : ControllerBase
             Day = newRide.day,
             Driverusername = newRide.Driver.User.Username,
             EndLocation = newRide.endLocation,
-            StartLocation = newRide.startLocation
+            StartLocation = newRide.startLocation,
+            RideId = newRide.Id
         };
     }
 }
