@@ -87,5 +87,15 @@ public class UserController : ControllerBase
         };
     }
 
+    // TODO: add ride
+
+    // TODO: check if rider going from source to destination locations
+
+    // TODO: check if rider going during the weekdays
+
+    // TODO: check if ride has enough seats
+
+    // TODO: add ride and return ridedto
+
 
 }
