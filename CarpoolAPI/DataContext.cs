@@ -35,6 +35,18 @@ public class DataContext : DbContext
         modelBuilder.Entity<Ride>()
             .HasMany(r => r.Users)
             .WithMany(u => u.Rides);
+
+        //modelBuilder.Entity<Ride>()
+        //    .Ignore(r => r.Users);
+
+        //modelBuilder.Entity<Ride>()
+        //    .Ignore(r => r.Driver);
+
+        //modelBuilder.Entity<Driver>()
+        //    .Ignore(r => r.User);
+
+        //modelBuilder.Entity<Driver>()
+        //    .Ignore(r => r.Rides);
     }
 
     public DbSet<User> Users { get; set; }

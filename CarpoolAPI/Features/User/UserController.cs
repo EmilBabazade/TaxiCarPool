@@ -41,23 +41,31 @@ public class UserController : ControllerBase
             PasswordSalt = hmac.Key
         };
 
+        Driver.Driver driver = null;
+
         if (registerDto.IsDriver)
         {
             if (String.IsNullOrWhiteSpace(registerDto.carModel))
                 return BadRequest("If user is a driver, carmodel is required");
             if (registerDto.seatCount == null || registerDto.seatCount < 2)
                 return BadRequest("If user is a driver, seatcount is required and needs to be more than 1");
-            var driver = new Driver.Driver
+            driver = new Driver.Driver
             {
                 carModel = registerDto.carModel,
                 seatCount = (int)registerDto.seatCount,
                 User = user
             };
             _context.Add(driver);
-            user.Driver = driver;
         }
 
+        user.Driver = driver;
         _context.Add(user);
+        await _context.SaveChangesAsync();
+        if (driver != null)
+        {
+            driver.User = user;
+            driver.UserId = user.Id;
+        }
         await _context.SaveChangesAsync();
 
         return new UserDto
@@ -128,6 +136,29 @@ public class UserController : ControllerBase
             EndLocation = ride.endLocation,
             StartLocation = ride.startLocation,
             RideId = ride.Id
+        };
+    }
+
+    [HttpGet("GetUser")]
+    public async Task<ActionResult<GetUserDto>> GetUser([FromQuery] string username)
+    {
+        // including rides and driver ends up with an object cycle
+        var user = await _context
+            .Users
+            .SingleOrDefaultAsync(u => u.Username == username);
+        if (user == null) return NotFound("User not found");
+        var driver = await _context.Drivers
+            .SingleOrDefaultAsync(d => d.UserId == user.Id);
+        var rides = driver == null
+            ? await _context.Rides.Where(r => r.Users.Contains(user)).ToListAsync()
+            : await _context.Rides.Where(r => r.DriverId == driver.Id).ToListAsync();
+        return new GetUserDto
+        {
+            Username = username,
+            Driver = driver,
+            Email = user.Email,
+            Rides = rides,
+            Id = user.Id
         };
     }
 }
