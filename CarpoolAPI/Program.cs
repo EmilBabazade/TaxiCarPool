@@ -1,4 +1,5 @@
 using CarpoolAPI;
+using CarpoolAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DataContext>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 
