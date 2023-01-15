@@ -19,7 +19,7 @@ public class UserController : ControllerBase
         _tokenService = tokenService;
     }
 
-    [HttpPost]
+    [HttpPost("Register")]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
         var userExistsByUsername = async (string username)
@@ -66,4 +66,26 @@ public class UserController : ControllerBase
             Token = _tokenService.CreateToken(user)
         };
     }
+
+    [HttpPost("Login")]
+    public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+    {
+        User user = await _context.Users.SingleOrDefaultAsync(u => u.Email == loginDto.Email.ToLower());
+        if (user == null) return Unauthorized("Invalid Email");
+
+        using var hmac = new HMACSHA512(user.PasswordSalt);
+        byte[] computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
+        for (int i = 0; i < computedHash.Length; i++)
+        {
+            if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Password invalid");
+        }
+
+        return new UserDto
+        {
+            Username = user.Username,
+            Token = _tokenService.CreateToken(user)
+        };
+    }
+
+
 }
