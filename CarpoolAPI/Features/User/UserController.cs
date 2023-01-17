@@ -91,6 +91,7 @@ public class UserController : ControllerBase
         return new UserDto
         {
             Username = user.Username,
+            IsDriver = user.DriverId != null,
             Token = _tokenService.CreateToken(user)
         };
     }

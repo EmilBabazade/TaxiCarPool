@@ -79,4 +79,28 @@ public class RideController : ControllerBase
             })
             .ToListAsync();
     }
+
+    [HttpDelete]
+    public async Task<IActionResult> Delete([FromQuery] string username, [FromQuery] int rideId)
+    {
+        // check user exists
+        var user = await _context.Users.Include(u => u.Driver).SingleOrDefaultAsync(u => u.Username == username);
+        if (user == null) return NotFound("User not found");
+
+        // check user is a driver
+        if (user.DriverId == null) return BadRequest("User is not a driver");
+
+        // check ride exists
+        var ride = await _context.Rides.Include(r => r.Driver).SingleOrDefaultAsync(r => r.Id == rideId);
+        if (ride == null) return NotFound("Ride not found");
+
+        // check ride belongs to user
+        if (ride.DriverId != user.DriverId) return BadRequest("Ride doesn't belong to driver");
+
+        // delete ride
+        _context.Remove(ride);
+
+        await _context.SaveChangesAsync();
+        return Ok();
+    }
 }
