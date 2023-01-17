@@ -55,13 +55,15 @@ public class RideController : ControllerBase
 
     [HttpGet("GetRides")]
     public async Task<ActionResult<List<RideDto>>> GetRides(
-        DayOfWeek? dayOfWeek, string? sourceLocation, string? destinationLocation)
+        string? ignoreUserRides, DayOfWeek? dayOfWeek, string? sourceLocation, string? destinationLocation)
     {
         var rides = _context
             .Rides
             .Include(r => r.Driver)
             .Include(r => r.Users)
             .Where(r => r.Users.Count() < r.Driver.seatCount); // ignore full rides
+        if (ignoreUserRides != null)
+            rides = rides.Where(r => !r.Users.Any(u => u.Username == ignoreUserRides));
         if (dayOfWeek != null)
             rides = rides.Where(r => r.day == dayOfWeek);
         if (sourceLocation != null)
@@ -80,7 +82,7 @@ public class RideController : ControllerBase
             .ToListAsync();
     }
 
-    [HttpDelete("Delete ride")]
+    [HttpDelete("DeleteRide")]
     public async Task<IActionResult> Delete([FromQuery] string username, [FromQuery] int rideId)
     {
         // check user exists
