@@ -96,6 +96,21 @@ public class UserController : ControllerBase
         };
     }
 
+    [HttpGet("RemoveUserFromRide/")]
+    public async Task<IActionResult> RemoveUserFromRide([FromQuery] string username, [FromQuery] int rideId)
+    {
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username.ToLower());
+        if (user == null) return Ok();
+
+        var ride = await _context.Rides.Include(r => r.Users).SingleOrDefaultAsync(r => r.Id == rideId);
+        if (ride == null) return Ok();
+
+        ride.Users.Remove(user);
+        _context.Update(ride);
+        await _context.SaveChangesAsync();
+        return Ok();
+    }
+
     [HttpPost("AddUserToRide/")]
     public async Task<ActionResult<RideDto>> AddUserToRide([FromQuery] int rideId, [FromBody] AddRideDto addRideDto)
     {

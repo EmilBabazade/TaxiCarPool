@@ -80,7 +80,7 @@ public class RideController : ControllerBase
             .ToListAsync();
     }
 
-    [HttpDelete]
+    [HttpDelete("Delete ride")]
     public async Task<IActionResult> Delete([FromQuery] string username, [FromQuery] int rideId)
     {
         // check user exists
